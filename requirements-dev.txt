@@ -16,3 +16,4 @@ sphinx
 sphinx-intl
 coveralls
 pylint
+python-nmap
