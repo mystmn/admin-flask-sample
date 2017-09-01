@@ -1,34 +1,22 @@
 {% extends 'default.html' %}
 
 {% block body %}
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='custom_grid.css') }}">
 
-<h1>Octets</h1>
-    <div class="row" style="margin:6px;">
-        <div class="col-sm-2"><a href="/admin">Home</a>
-        </div>
-    </div>
-<section>
-
-    <div class="row">
-        <div class="col-sm-2">IP Address</div>
-        <div class="col-sm-2">Device</div>
-        <div class="col-sm-2">Location</div>
-
+<div class="container">
+    <div class="row" style="margin-bottom: 20px; color: red;">
+        <div class="col-md-4 col-sm-6 col-xs-12"> IP Address</div>
+        <div class="col-md-4 col-sm-6 col-xs-12"> Device</div>
+        <div class="col-md-4 col-sm-6 col-xs-12"> Location</div>
     </div>
     {% for name in names %}
-    <div class="row" style="margin:0,0,5px,0;">
-        <div class="col-sm-1">
-            <div class=flash><a href="./segment?name={{name.ip_address}}">{{ name.ip_address }}</a></div>
+        <div class="row row-striped">
+            <div class="col-md-4 col-sm-6 col-xs-12"><a href="./segment/{{name.ip_address}}">{{ name.ip_address }}</a></div>
+            <div class="col-md-4 col-sm-6 col-xs-12">{{ name.device_name }}</div>
+            <div class="col-md-4 col-sm-6 col-xs-12">{{ name.location }}</div>
         </div>
-        <div class="col-sm-1">
-            <div class=flash>{{ name.device }}</div>
-        </div>
-        <div class="col-sm-1">
-            <div class=flash>{{ name.location }}</div>
-        </div>
-    </div>
     {% endfor %}
-</section>
+</div>
 {% endblock %}
 
 

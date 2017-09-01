@@ -1,0 +1,37 @@
+{% extends 'default.html' %}
+
+{% block body %}
+<script>
+$(function() {
+  $('#submit').bind('click', function() {
+    $.getJSON('{{ url_for('.index') }}', {
+          a: $('input[name=location"]').val(),
+    });
+    return false;
+  });
+});
+</script>
+<div class="container">
+    <div class="row" style="margin-bottom: 20px; color: red;">
+        <div class="col-md-4 col-sm-6 col-xs-12">IP Address : {{ x.ip_address }}</div>
+        <div class="col-md-4 col-sm-6 col-xs-12">Device : {{ x.device_name }}</div>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <form class="form-signin" method=post>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            Location:<input name="location" placeholder="{{x.location}}">
+            <input type=submit value=submit class='btn btn-primary'>
+        </form>
+
+    </div>
+</div>
+<div class="container">
+    <div row="row">
+        ## https://stackoverflow.com/questions/40407901/ajax-form-submit-without-page-refresh
+    </div>
+</div>
+{% endblock %}
+
+

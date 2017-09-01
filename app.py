@@ -1,12 +1,16 @@
-from flask import Flask, redirect, render_template, request
+from flask import Flask, redirect, render_template, request, url_for
 from flask_admin import BaseView, Admin, expose
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin.contrib import sqla
+import flask_wtf
 
 # Create flask app
 app = Flask(__name__, template_folder='templates')
 # Create dummy secrey key so we can use sessions
 app.config['SECRET_KEY'] = 'PizzaPi3sIsG00d'
+app.config['CSRF_ENABLED'] = True
+
+flask_wtf.CsrfProtect(app)
 
 # Create in-memory database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sample_db_001.sqlite'
@@ -112,9 +116,14 @@ def build_live_list():
 
 
 # Flask views
-@app.route('/')
+@app.route('/', methods=('GET', 'POST'))
 def index():
-    return '<a href="/admin/">Click me to get to Admin!</a>'
+    if request.method == 'POST':
+        message = request.form['location']
+        return '<a href="/admin/">Click me to get to Admin!{}</a>'.format(message)
+    else:
+        a = request.args.get('location', None)
+        return '<a href="/admin/">Click me to get to Admin!{}</a>'.format(a)
 
 
 @app.route('/build')
@@ -123,16 +132,25 @@ def building():
     return redirect('admin/networksql')
 
 
-@app.route('/n/segment')
-def tesingpath():
-    names = request.args.get('name')
-    return render_template('octets.html', names=names)
-
-
 @app.route('/segment')
 def segmentSQL():
     names = NetworkSQL.query.all()
     return render_template('octets.html', names=names)
+
+
+@app.route('/segment/<four_octets>', methods=('GET', 'POST'))
+def device_octets_path(four_octets):
+    form = NetworkSQL()
+    x = form.query.filter_by(ip_address=four_octets).first()
+
+    if request.method == 'POST':
+        get_results = request.form['location']
+        x.location = get_results
+        db.session.add(x)
+        db.session.commit()
+        return redirect(url_for('.segmentSQL'))
+
+    return render_template('fouroctets.html', x=x, form=form)
 
 
 # Create custom admin view
