@@ -43,8 +43,20 @@ class SegmentModel(sqla.ModelView):
     }
 
 
-# Network section ##
-class NetworkSQL(db.Model):
+class IPAddressLogs(db.Model):
+    __tablename__ = 'ipAddressChangeLogs'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    device_name = db.Column(db.String(25))  # unique=False
+    ip_address = db.Column(db.String(25))  # unique=False
+    notes = db.Column(db.String(50))
+    created_on = db.Column(db.DateTime, server_default=db.func.now())
+
+    def __str__(self):
+        return self.desc
+
+
+# Four Octets - Network ##
+class NetworkFourOctetsSQL(db.Model):
     __tablename__ = 'deviceNames'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     device_name = db.Column(db.String(25))  # unique=False
@@ -88,7 +100,7 @@ def build_live_list():
     each_line_scanned = nmap3.filter_names(s)
 
     for more in each_line_scanned[:5]:
-        device_each = NetworkSQL()
+        device_each = NetworkFourOctetsSQL()
 
         if more['Device'] is str("DHCP"):
             device_each.device_name = " "
@@ -112,6 +124,10 @@ def build_live_list():
         if not testing_setting:
             db.session.add(seg)
 
+        # Creating log - for each added device #
+
+
+        # Commit your request
         db.session.commit()
 
 
@@ -132,15 +148,21 @@ def building():
     return redirect('admin/networksql')
 
 
-@app.route('/segment')
+@app.route('/mapSegments')
 def segmentSQL():
-    names = NetworkSQL.query.all()
-    return render_template('octets.html', names=names)
+    names = SegmentSQL.query.all()
+    return render_template('mapSegments.html', names=names)
+
+
+@app.route('/mapOctets/<x>')
+def map_octets(x):
+    names = db.engine.execute("SELECT * FROM {} WHERE ip_address LIKE '{}%'".format('deviceNames', x))
+    return render_template('mapSegments.html', names=names)
 
 
 @app.route('/segment/<four_octets>', methods=('GET', 'POST'))
 def device_octets_path(four_octets):
-    form = NetworkSQL()
+    form = NetworkFourOctetsSQL()
     x = form.query.filter_by(ip_address=four_octets).first()
 
     if request.method == 'POST':
@@ -164,7 +186,7 @@ class MyView(BaseView):
 # Create admin interface
 admin = Admin(name="Pacman", template_mode='bootstrap3')
 admin.add_view(MyView(name='My View', menu_icon_type='glyph', menu_icon_value='glyphicon-home'))
-admin.add_view(NetworkModel(NetworkSQL, db.session))
+admin.add_view(NetworkModel(NetworkFourOctetsSQL, db.session))
 admin.add_view(SegmentModel(SegmentSQL, db.session))
 
 admin.init_app(app)
@@ -175,6 +197,7 @@ if __name__ == '__main__':
     nmap3.starting()
 
     # Create DB
+    # build_live_list()
     db.create_all()
 
     # Start app
