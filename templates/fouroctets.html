@@ -6,15 +6,17 @@ $(function() {
   $('#submit').bind('click', function() {
     $.getJSON('{{ url_for('.index') }}', {
           a: $('input[name=location"]').val(),
+          b: $('input[name=device"]').val(),
     });
     return false;
   });
 });
 </script>
+{% for name in x %}
 <div class="container">
     <div class="row" style="margin-bottom: 20px; color: red;">
-        <div class="col-md-4 col-sm-6 col-xs-12">IP Address : {{ x.ip_address }}</div>
-        <div class="col-md-4 col-sm-6 col-xs-12">Device : {{ x.device_name }}</div>
+        <div class="col-md-4 col-sm-6 col-xs-12">IP Address : {{ name.ip_address }}</div>
+        <div class="col-md-4 col-sm-6 col-xs-12">Device : {{ name.device_name }}</div>
     </div>
 </div>
 <div class="container">
@@ -22,11 +24,14 @@ $(function() {
         <form class="form-signin" method=post>
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             Location:<input name="location" placeholder="{{x.location}}">
+            Device:<input name="device" placeholder="{{x.device_name}}">
             <input type=submit value=submit class='btn btn-primary'>
         </form>
 
     </div>
 </div>
+{% endfor %}
+
 <div class="container">
     <div row="row">
         ## https://stackoverflow.com/questions/40407901/ajax-form-submit-without-page-refresh
@@ -36,9 +41,9 @@ $(function() {
 <div class="container">
     <div class="row" style="margin-bottom: 20px; color: blue;">
         {% for log in device_logs %}
-            <div class="col-md-4 col-sm-6 col-xs-12">Notes : {{ log.notes }}</div>
+        <div class="col-md-4 col-sm-6 col-xs-12">Notes : {{ log.notes }}</div>
         {% endfor %}
     </div>
-{% endblock %}
+    {% endblock %}
 
 

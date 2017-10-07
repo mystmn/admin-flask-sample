@@ -131,6 +131,9 @@ def build_live_list():
         db.session.commit()
 
 
+# PRAGMA table_info(deviceNames);
+#  UPDATE deviceNames SET device_name='cocsws142000' WHERE id=4
+
 # Flask views
 @app.route('/', methods=('GET', 'POST'))
 def index():
@@ -151,28 +154,38 @@ def building():
 @app.route('/mapSegments')
 def segmentSQL():
     names = SegmentSQL.query.all()
-    return render_template('mapSegments.html', names=names)
+    url = "./map"
+    return render_template('mapSegments.html', names=names, url=url)
 
 
-@app.route('/mapOctets/<x>')
+@app.route('/map/<x>')
 def map_octets(x):
     names = db.engine.execute("SELECT * FROM {} WHERE ip_address LIKE '{}%'".format('deviceNames', x))
-    return render_template('mapSegments.html', names=names)
+    url = "../segment"
+    return render_template('mapSegments.html', names=names, url=url)
+
+
+@app.route('/success/<name>')
+def success(name):
+    return 'welcome %s' % name
 
 
 @app.route('/segment/<four_octets>', methods=('GET', 'POST'))
 def device_octets_path(four_octets):
-    form = NetworkFourOctetsSQL()
-    x = form.query.filter_by(ip_address=four_octets).first()
-
     if request.method == 'POST':
-        get_results = request.form['location']
-        x.location = get_results
-        db.session.add(x)
+        y = NetworkFourOctetsSQL()
+        y.location = request.form['location']
+        y.device_name = request.form['device']
+        db.session.add(y)
         db.session.commit()
-        return redirect(url_for('.segmentSQL'))
+        return redirect(url_for('success', name=y.location))
 
-    return render_template('fouroctets.html', x=x, form=form)
+    if request.method == 'GET':
+        open_conn = db.engine.execute(
+            "SELECT * FROM {} WHERE {}='{}' LIMIT 1".format("deviceNames", "ip_address", four_octets))
+        x = open_conn
+
+    return render_template('fouroctets.html', x=x)
 
 
 # Create custom admin view

@@ -11,8 +11,9 @@
     </div>
     {% for name in names %}
         <div class="row row-striped">
-            <div class="col-md-4 col-sm-6 col-xs-12"><a href="./mapOctets/{{name.ip_address}}">{{ name.ip_address }}</a></div>
-            <div class="col-md-4 col-sm-6 col-xs-12">{{ name.ip_address }}</div>
+            <div class="col-md-4 col-sm-6 col-xs-12"><a href="{{url}}/{{name.ip_address}}">{{ name.ip_address }}</a></div>
+            <div class="col-md-4 col-sm-6 col-xs-12">{{ name.device_name }}</div>
+            <div class="col-md-4 col-sm-6 col-xs-12">{{ name.location }}</div>
         </div>
     {% endfor %}
 </div>
